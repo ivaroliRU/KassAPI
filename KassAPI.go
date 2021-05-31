@@ -23,7 +23,7 @@ type Client struct {
 	Password string
 }
 
-// create client
+// create KassAPI client
 func New(production bool, user string, password string) *Client {
 	url := ProductionURL
 
