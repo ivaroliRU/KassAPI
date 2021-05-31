@@ -5,5 +5,8 @@ import (
 )
 
 func main() {
-	fmt.Println("asdf")
+	client := New(false, "", "")
+
+	err := client.CreateCharge()
+	fmt.Println(err)
 }
