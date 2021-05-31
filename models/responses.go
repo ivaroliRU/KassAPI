@@ -7,7 +7,8 @@ type ErrorMessage struct {
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Id      string `id:"success"`
-	Created int64  `json:"created"`
+	Success bool          `json:"success"`
+	Id      string        `id:"success"`
+	Created int64         `json:"created"`
+	Error   *ErrorMessage `json:"error"`
 }

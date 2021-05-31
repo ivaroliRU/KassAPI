@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/ivaroliRU/KassAPI/models"
@@ -24,6 +23,7 @@ type Client struct {
 	Password string
 }
 
+// create client
 func New(production bool, user string, password string) *Client {
 	url := ProductionURL
 
@@ -38,21 +38,23 @@ func New(production bool, user string, password string) *Client {
 	}
 }
 
+// turn username:password to base64
 func basicAuth(username, password string) string {
 	auth := username + ":" + password
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (c *Client) CreateCharge() *error {
+// create charge and post
+func (c *Client) CreateCharge(amount int, description, imageURL, order, recipient string, terminal, expiresIn int, notifyUrl string) (*models.Response, *error) {
 	data := &models.CreateChargeRequest{
-		Amount:      100,
-		Description: "",
-		Order:       "asd32434ifj",
-		ImageURL:    "asdf",
-		Recipient:   "eæpi53pm",
-		Terminal:    1,
-		ExpiresIn:   90,
-		NotifyURL:   "https://example.com/callbacks/kass",
+		Amount:      amount,
+		Description: description,
+		ImageURL:    imageURL,
+		Order:       order,
+		Recipient:   recipient,
+		Terminal:    terminal,
+		ExpiresIn:   expiresIn,
+		NotifyURL:   notifyUrl,
 	}
 
 	payloadBuf := new(bytes.Buffer)
@@ -63,10 +65,18 @@ func (c *Client) CreateCharge() *error {
 	req.Header.Add("Authorization", "Basic "+basicAuth(c.User, c.Password))
 
 	client := &http.Client{}
-	res, _ := client.Do(req)
+	res, err := client.Do(req)
 
-	b, _ := io.ReadAll(res.Body)
-	fmt.Println(string(b))
+	if err != nil {
+		return nil, &err
+	}
 
-	return nil
+	body, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	var response models.Response
+
+	json.Unmarshal(body, &response)
+
+	return &response, nil
 }
